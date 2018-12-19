@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+
+  flask_app:
+    container_name: flask_app
+    restart: always
+    build: ./flask_app
+    command: gunicorn -w 1 -b :8000 app:server
+    networks:
+      - nginx_network
+
+  nginx:
+    container_name: nginx
+    restart: always
+    build: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - flask_app
+    networks:
+      - nginx_network
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    environment:
+      - TZ=Europe/Moscow
+
+networks:
+  nginx_network:
+    driver: bridge
